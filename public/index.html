@@ -1,0 +1,904 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ระบบสื่อการเรียนการสอน | ปสส.รุ่นที่ 15 (นรต.79)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --navy: #0d1f3c;
+      --navy-mid: #152d54;
+      --navy-light: #1e3f7a;
+      --gold: #c9a84c;
+      --gold-light: #e8c97a;
+      --white: #ffffff;
+      --gray-50: #f8f9fb;
+      --gray-100: #eef0f4;
+      --gray-300: #c8cdd8;
+      --gray-500: #7a8399;
+      --gray-700: #3d4560;
+      --shadow-sm: 0 2px 8px rgba(13,31,60,0.08);
+      --shadow-md: 0 6px 24px rgba(13,31,60,0.14);
+      --shadow-lg: 0 16px 48px rgba(13,31,60,0.22);
+      --radius: 14px;
+      --radius-sm: 8px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Sarabun', sans-serif;
+      background: var(--gray-50);
+      color: var(--gray-700);
+      min-height: 100vh;
+    }
+
+    /* ===== HEADER ===== */
+    header {
+      background: linear-gradient(135deg, var(--navy) 0%, var(--navy-mid) 60%, var(--navy-light) 100%);
+      color: var(--white);
+      padding: 0;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 4px 20px rgba(13,31,60,0.3);
+    }
+
+    .header-inner {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 18px 32px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .header-badge {
+      width: 56px;
+      height: 56px;
+      background: var(--gold);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 26px;
+      flex-shrink: 0;
+      box-shadow: 0 0 0 3px rgba(201,168,76,0.3);
+    }
+
+    .header-text h1 {
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+    }
+
+    .header-text p {
+      font-size: 13px;
+      color: var(--gold-light);
+      margin-top: 2px;
+      font-weight: 400;
+    }
+
+    /* ===== HERO STATS ===== */
+    .hero {
+      background: linear-gradient(135deg, var(--navy-mid) 0%, var(--navy-light) 100%);
+      padding: 28px 32px;
+    }
+
+    .hero-inner {
+      max-width: 1280px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+      flex-wrap: wrap;
+    }
+
+    .hero-info h2 {
+      color: var(--white);
+      font-size: 28px;
+      font-weight: 700;
+      line-height: 1.3;
+    }
+
+    .hero-info p {
+      color: var(--gold-light);
+      font-size: 14px;
+      margin-top: 6px;
+    }
+
+    .stats-row {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .stat-card {
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(201,168,76,0.25);
+      border-radius: var(--radius-sm);
+      padding: 14px 22px;
+      text-align: center;
+      min-width: 100px;
+      backdrop-filter: blur(4px);
+    }
+
+    .stat-card .num {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--gold-light);
+    }
+
+    .stat-card .label {
+      font-size: 12px;
+      color: rgba(255,255,255,0.75);
+      margin-top: 2px;
+    }
+
+    /* ===== CONTROLS ===== */
+    .controls {
+      background: var(--white);
+      border-bottom: 1px solid var(--gray-100);
+      padding: 14px 32px;
+      position: sticky;
+      top: 93px;
+      z-index: 90;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .controls-inner {
+      max-width: 1280px;
+      margin: 0 auto;
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .filter-label {
+      font-size: 13px;
+      color: var(--gray-500);
+      font-weight: 500;
+      white-space: nowrap;
+    }
+
+    .filter-btn {
+      padding: 7px 16px;
+      border-radius: 20px;
+      border: 1.5px solid var(--gray-300);
+      background: transparent;
+      font-family: 'Sarabun', sans-serif;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--gray-700);
+      cursor: pointer;
+      transition: all 0.18s ease;
+      white-space: nowrap;
+    }
+
+    .filter-btn:hover {
+      border-color: var(--navy-light);
+      color: var(--navy-light);
+      background: rgba(30,63,122,0.05);
+    }
+
+    .filter-btn.active {
+      background: var(--navy);
+      border-color: var(--navy);
+      color: var(--white);
+    }
+
+    .search-box {
+      flex: 1;
+      max-width: 280px;
+      position: relative;
+      margin-left: auto;
+    }
+
+    .search-box input {
+      width: 100%;
+      padding: 8px 16px 8px 38px;
+      border: 1.5px solid var(--gray-300);
+      border-radius: 20px;
+      font-family: 'Sarabun', sans-serif;
+      font-size: 13px;
+      color: var(--gray-700);
+      outline: none;
+      transition: border-color 0.18s;
+    }
+
+    .search-box input:focus {
+      border-color: var(--navy-light);
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 14px;
+      color: var(--gray-500);
+    }
+
+    /* ===== MAIN CONTENT ===== */
+    .main {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 32px;
+    }
+
+    /* Day group */
+    .day-group {
+      margin-bottom: 40px;
+    }
+
+    .day-header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 16px;
+    }
+
+    .day-badge {
+      background: var(--navy);
+      color: var(--white);
+      padding: 8px 18px;
+      border-radius: 20px;
+      font-size: 14px;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .day-line {
+      flex: 1;
+      height: 1px;
+      background: var(--gray-100);
+    }
+
+    .day-count {
+      font-size: 12px;
+      color: var(--gray-500);
+      white-space: nowrap;
+    }
+
+    /* Card grid */
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 20px;
+    }
+
+    /* Lesson card */
+    .lesson-card {
+      background: var(--white);
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      cursor: pointer;
+      border: 1px solid var(--gray-100);
+    }
+
+    .lesson-card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .lesson-card:hover .card-thumb-overlay {
+      opacity: 1;
+    }
+
+    .card-thumb {
+      position: relative;
+      width: 100%;
+      height: 200px;
+      overflow: hidden;
+      background: var(--gray-100);
+    }
+
+    .card-thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: top;
+      transition: transform 0.3s ease;
+      display: block;
+    }
+
+    .lesson-card:hover .card-thumb img {
+      transform: scale(1.04);
+    }
+
+    .card-thumb-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(13,31,60,0.55);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+
+    .view-btn {
+      background: var(--gold);
+      color: var(--navy);
+      border: none;
+      padding: 10px 22px;
+      border-radius: 22px;
+      font-family: 'Sarabun', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .session-badge {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+
+    .session-badge.morning {
+      background: rgba(255,200,60,0.92);
+      color: #5a3a00;
+    }
+
+    .session-badge.afternoon {
+      background: rgba(255,120,60,0.92);
+      color: #fff;
+    }
+
+    .card-body {
+      padding: 18px 20px;
+    }
+
+    .card-subject {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--navy);
+      line-height: 1.45;
+      margin-bottom: 10px;
+    }
+
+    .card-meta {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .meta-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 12px;
+      color: var(--gray-500);
+      background: var(--gray-50);
+      border: 1px solid var(--gray-100);
+      padding: 3px 10px;
+      border-radius: 10px;
+    }
+
+    /* ===== EMPTY STATE ===== */
+    .empty-state {
+      text-align: center;
+      padding: 80px 20px;
+      color: var(--gray-500);
+    }
+
+    .empty-state .icon {
+      font-size: 48px;
+      margin-bottom: 16px;
+    }
+
+    .empty-state h3 {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--gray-700);
+      margin-bottom: 6px;
+    }
+
+    /* ===== LIGHTBOX MODAL ===== */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(5,12,30,0.92);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .modal-overlay.open {
+      display: flex;
+    }
+
+    .modal-box {
+      background: var(--white);
+      border-radius: var(--radius);
+      max-width: 900px;
+      width: 100%;
+      max-height: 92vh;
+      overflow: hidden;
+      box-shadow: var(--shadow-lg);
+      display: flex;
+      flex-direction: column;
+      animation: slideUp 0.25s ease;
+    }
+
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .modal-header {
+      background: var(--navy);
+      color: var(--white);
+      padding: 16px 22px;
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .modal-title {
+      font-size: 15px;
+      font-weight: 600;
+      line-height: 1.4;
+    }
+
+    .modal-sub {
+      font-size: 12px;
+      color: var(--gold-light);
+      margin-top: 4px;
+    }
+
+    .modal-close {
+      background: rgba(255,255,255,0.12);
+      border: none;
+      color: var(--white);
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      font-size: 18px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: background 0.15s;
+    }
+
+    .modal-close:hover {
+      background: rgba(255,255,255,0.22);
+    }
+
+    .modal-img-wrap {
+      overflow-y: auto;
+      flex: 1;
+      background: var(--gray-50);
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .modal-img-wrap img {
+      max-width: 100%;
+      height: auto;
+      border-radius: var(--radius-sm);
+      box-shadow: var(--shadow-md);
+      display: block;
+    }
+
+    .modal-footer {
+      border-top: 1px solid var(--gray-100);
+      padding: 14px 22px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .nav-btns {
+      display: flex;
+      gap: 8px;
+    }
+
+    .nav-btn {
+      padding: 8px 18px;
+      border-radius: 8px;
+      border: 1.5px solid var(--gray-300);
+      background: var(--white);
+      font-family: 'Sarabun', sans-serif;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--gray-700);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .nav-btn:hover:not(:disabled) {
+      border-color: var(--navy-light);
+      color: var(--navy);
+    }
+
+    .nav-btn:disabled {
+      opacity: 0.4;
+      cursor: default;
+    }
+
+    .open-drive-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 18px;
+      background: var(--navy);
+      color: var(--white);
+      border-radius: 8px;
+      font-family: 'Sarabun', sans-serif;
+      font-size: 13px;
+      font-weight: 500;
+      text-decoration: none;
+      transition: background 0.15s;
+    }
+
+    .open-drive-btn:hover {
+      background: var(--navy-light);
+    }
+
+    /* ===== FOOTER ===== */
+    footer {
+      background: var(--navy);
+      color: rgba(255,255,255,0.55);
+      text-align: center;
+      padding: 20px;
+      font-size: 13px;
+      margin-top: 40px;
+    }
+
+    footer span {
+      color: var(--gold-light);
+      font-weight: 600;
+    }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 640px) {
+      .header-inner { padding: 14px 18px; }
+      .hero { padding: 20px 18px; }
+      .hero-info h2 { font-size: 20px; }
+      .controls { padding: 12px 18px; top: 86px; }
+      .main { padding: 20px 18px; }
+      .card-grid { grid-template-columns: 1fr; }
+      .stats-row { gap: 10px; }
+      .stat-card { padding: 10px 16px; }
+      .search-box { max-width: 100%; margin-left: 0; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="header-inner">
+    <div class="header-badge">🚔</div>
+    <div class="header-text">
+      <h1>ระบบสื่อการเรียนการสอน</h1>
+      <p>พนักงานสอบสวน | ปสส. รุ่นที่ 15 (นรต.79)</p>
+    </div>
+  </div>
+</header>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-inner">
+    <div class="hero-info">
+      <h2>ปสส. รุ่นที่ 15 (นรต.79)</h2>
+      <p>ผอ.หลักสูตร: พ.ต.อ.อุเทน นุ้ยพิน &nbsp;|&nbsp; ข้อมูล ณ เดือนเมษายน 2569</p>
+    </div>
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="num" id="total-lessons">10</div>
+        <div class="label">บทเรียนทั้งหมด</div>
+      </div>
+      <div class="stat-card">
+        <div class="num" id="total-days">6</div>
+        <div class="label">วันเรียน</div>
+      </div>
+      <div class="stat-card">
+        <div class="num" id="total-subjects">8</div>
+        <div class="label">วิชา</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CONTROLS -->
+<div class="controls">
+  <div class="controls-inner">
+    <span class="filter-label">กรองตามวัน:</span>
+    <button class="filter-btn active" data-filter="all" onclick="setFilter('all', this)">ทั้งหมด</button>
+    <button class="filter-btn" data-filter="23" onclick="setFilter('23', this)">23 เม.ย.</button>
+    <button class="filter-btn" data-filter="24" onclick="setFilter('24', this)">24 เม.ย.</button>
+    <button class="filter-btn" data-filter="27" onclick="setFilter('27', this)">27 เม.ย.</button>
+    <button class="filter-btn" data-filter="28" onclick="setFilter('28', this)">28 เม.ย.</button>
+    <button class="filter-btn" data-filter="29" onclick="setFilter('29', this)">29 เม.ย.</button>
+    <button class="filter-btn" data-filter="30" onclick="setFilter('30', this)">30 เม.ย.</button>
+    <div class="search-box">
+      <span class="search-icon">🔍</span>
+      <input type="text" id="search-input" placeholder="ค้นหาวิชา..." oninput="onSearch(this.value)" />
+    </div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<main class="main" id="main-content"></main>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modal" onclick="onOverlayClick(event)">
+  <div class="modal-box">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title" id="modal-title"></div>
+        <div class="modal-sub" id="modal-sub"></div>
+      </div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-img-wrap">
+      <img id="modal-img" src="" alt="สื่อการเรียนการสอน" />
+    </div>
+    <div class="modal-footer">
+      <div class="nav-btns">
+        <button class="nav-btn" id="prev-btn" onclick="navigateModal(-1)">← ก่อนหน้า</button>
+        <button class="nav-btn" id="next-btn" onclick="navigateModal(1)">ถัดไป →</button>
+      </div>
+      <a id="modal-drive-link" href="#" target="_blank" class="open-drive-btn">
+        🔗 เปิดใน Google Drive
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <p>ระบบสื่อการเรียนการสอน | <span>ปสส. รุ่นที่ 15 (นรต.79)</span> | พัฒนาโดย Claude AI</p>
+</footer>
+
+<script>
+  // ===== DATA =====
+  const lessons = [
+    {
+      id: "1RCYOSnS19m49CyJXGdEoZdH2xVfBZech",
+      date: "23 เมษายน 2569",
+      day: "23",
+      session: "บ่าย",
+      subject: "การทำสำนวนอาวุธปืน",
+    },
+    {
+      id: "116vYZBPcziRhSQxBrSLlaT1Sh85B1dWc",
+      date: "24 เมษายน 2569",
+      day: "24",
+      session: "เช้า",
+      subject: "การทำสำนวนอาวุธปืน",
+    },
+    {
+      id: "1_jxpmrk5bZuiBca8CfIst7HehzeGRrOz",
+      date: "24 เมษายน 2569",
+      day: "24",
+      session: "บ่าย",
+      subject: "กฎหมายทรัพย์สินทางปัญญาและการค้าระหว่างประเทศ",
+    },
+    {
+      id: "1KeFRzN25_xPn8vCuG69ZJRJT9OR_Fy6Z",
+      date: "27 เมษายน 2569",
+      day: "27",
+      session: "เช้า",
+      subject: "พ.ร.บ. จัดตั้งศาลแขวงและวิธีพิจารณาความอาญาในศาลแขวง",
+    },
+    {
+      id: "1peF0AlzJ7QVgSt4_URhNmf42k1w0_xI3",
+      date: "27 เมษายน 2569",
+      day: "27",
+      session: "บ่าย",
+      subject: "พ.ร.บ. จัดตั้งศาลแขวงและวิธีพิจารณาความอาญาในศาลแขวง",
+    },
+    {
+      id: "1P-DoVH_jEVhLvHGewK2yXTaqTZO8lLFY",
+      date: "28 เมษายน 2569",
+      day: "28",
+      session: "เช้า",
+      subject: "องค์ประกอบข้อกฎหมายและการตั้งประเด็นการสอบสวน ตาม ป.อาญา ภาค 2 ลักษณะ 6 (ความผิดเกี่ยวกับภยันตราย)",
+    },
+    {
+      id: "11Qh1VgaOC5L45T7xE_N7oanKu41048w_",
+      date: "28 เมษายน 2569",
+      day: "28",
+      session: "บ่าย",
+      subject: "กฎหมายว่าด้วยการป้องกันและปราบปรามการค้ามนุษย์",
+    },
+    {
+      id: "1kORk6hN5uzTG-6gNmy5uuQQZJhHec5qv",
+      date: "29 เมษายน 2569",
+      day: "29",
+      session: "เช้า",
+      subject: "การตั้งประเด็นการสอบสวนความผิดเกี่ยวกับเพศ",
+    },
+    {
+      id: "1l6bzTsaHYWVYiSgRScQFZAU8tidE_oKU",
+      date: "29 เมษายน 2569",
+      day: "29",
+      session: "บ่าย",
+      subject: "กฎหมายทุจริตคอรัปชั่น",
+    },
+    {
+      id: "1eZMMCK8VA4mamnR2_QEDl0p5DUBygeIb",
+      date: "30 เมษายน 2569",
+      day: "30",
+      session: "เช้า",
+      subject: "กฎหมายว่าด้วยพยานหลักฐาน (วิวัฒนาการและมาตรฐานสากล)",
+    },
+  ];
+
+  function imgUrl(fileId) {
+    return `https://lh3.googleusercontent.com/d/${fileId}=w1200`;
+  }
+
+  function driveUrl(fileId) {
+    return `https://drive.google.com/file/d/${fileId}/view`;
+  }
+
+  // ===== STATE =====
+  let activeFilter = "all";
+  let searchQuery = "";
+  let currentModalIndex = -1;
+  let filteredFlat = [];
+
+  function getFiltered() {
+    return lessons.filter(l => {
+      const matchDay = activeFilter === "all" || l.day === activeFilter;
+      const matchSearch = !searchQuery || l.subject.toLowerCase().includes(searchQuery) || l.date.includes(searchQuery);
+      return matchDay && matchSearch;
+    });
+  }
+
+  // ===== RENDER =====
+  function render() {
+    const filtered = getFiltered();
+    filteredFlat = filtered;
+
+    const container = document.getElementById("main-content");
+
+    if (filtered.length === 0) {
+      container.innerHTML = `
+        <div class="empty-state">
+          <div class="icon">🔍</div>
+          <h3>ไม่พบบทเรียนที่ตรงกัน</h3>
+          <p>ลองเปลี่ยนคำค้นหาหรือตัวกรอง</p>
+        </div>`;
+      return;
+    }
+
+    // Group by date
+    const groups = {};
+    filtered.forEach(l => {
+      if (!groups[l.date]) groups[l.date] = [];
+      groups[l.date].push(l);
+    });
+
+    let html = "";
+    for (const [date, items] of Object.entries(groups)) {
+      html += `
+        <div class="day-group">
+          <div class="day-header">
+            <div class="day-badge">📅 ${date}</div>
+            <div class="day-line"></div>
+            <div class="day-count">${items.length} บทเรียน</div>
+          </div>
+          <div class="card-grid">
+            ${items.map(l => cardHtml(l, filtered.indexOf(l))).join("")}
+          </div>
+        </div>`;
+    }
+    container.innerHTML = html;
+  }
+
+  function cardHtml(l, idx) {
+    const sessionClass = l.session === "เช้า" ? "morning" : "afternoon";
+    const sessionIcon = l.session === "เช้า" ? "☀️" : "🌤️";
+    return `
+      <div class="lesson-card" onclick="openModal(${idx})">
+        <div class="card-thumb">
+          <img src="${imgUrl(l.id)}" alt="${l.subject}" loading="lazy"
+               onerror="this.style.display='none';this.parentElement.style.background='#eef0f4';" />
+          <div class="card-thumb-overlay">
+            <button class="view-btn">👁️ ดูเนื้อหา</button>
+          </div>
+          <span class="session-badge ${sessionClass}">${sessionIcon} ${l.session}</span>
+        </div>
+        <div class="card-body">
+          <div class="card-subject">${l.subject}</div>
+          <div class="card-meta">
+            <span class="meta-chip">📅 ${l.date}</span>
+            <span class="meta-chip">⏰ ช่วง${l.session}</span>
+          </div>
+        </div>
+      </div>`;
+  }
+
+  // ===== FILTER =====
+  function setFilter(val, btn) {
+    activeFilter = val;
+    document.querySelectorAll(".filter-btn").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    render();
+  }
+
+  function onSearch(val) {
+    searchQuery = val.trim().toLowerCase();
+    render();
+  }
+
+  // ===== MODAL =====
+  function openModal(idx) {
+    currentModalIndex = idx;
+    updateModal();
+    document.getElementById("modal").classList.add("open");
+    document.body.style.overflow = "hidden";
+  }
+
+  function closeModal() {
+    document.getElementById("modal").classList.remove("open");
+    document.body.style.overflow = "";
+  }
+
+  function onOverlayClick(e) {
+    if (e.target === document.getElementById("modal")) closeModal();
+  }
+
+  function navigateModal(dir) {
+    const next = currentModalIndex + dir;
+    if (next >= 0 && next < filteredFlat.length) {
+      currentModalIndex = next;
+      updateModal();
+    }
+  }
+
+  function updateModal() {
+    const l = filteredFlat[currentModalIndex];
+    if (!l) return;
+
+    document.getElementById("modal-title").textContent = l.subject;
+    document.getElementById("modal-sub").textContent = `${l.date} | ช่วง${l.session}`;
+    document.getElementById("modal-img").src = imgUrl(l.id);
+    document.getElementById("modal-drive-link").href = driveUrl(l.id);
+
+    document.getElementById("prev-btn").disabled = currentModalIndex === 0;
+    document.getElementById("next-btn").disabled = currentModalIndex === filteredFlat.length - 1;
+  }
+
+  // Keyboard navigation
+  document.addEventListener("keydown", e => {
+    if (!document.getElementById("modal").classList.contains("open")) return;
+    if (e.key === "Escape") closeModal();
+    if (e.key === "ArrowLeft") navigateModal(-1);
+    if (e.key === "ArrowRight") navigateModal(1);
+  });
+
+  // ===== INIT =====
+  render();
+</script>
+</body>
+</html>
