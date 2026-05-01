@@ -21,16 +21,25 @@ function getDrive() {
   return google.drive({ version: 'v3', auth });
 }
 
+const THAI_MONTHS = {
+  'มกราคม':'ม.ค.','กุมภาพันธ์':'ก.พ.','มีนาคม':'มี.ค.','เมษายน':'เม.ย.',
+  'พฤษภาคม':'พ.ค.','มิถุนายน':'มิ.ย.','กรกฎาคม':'ก.ค.','สิงหาคม':'ส.ค.',
+  'กันยายน':'ก.ย.','ตุลาคม':'ต.ค.','พฤศจิกายน':'พ.ย.','ธันวาคม':'ธ.ค.',
+};
+
 function parseFilename(filename) {
-  const name = filename.replace(/\.png$/i, '').trim();
+  // normalize double sara-e (เเ → แ → เม) used in some filenames e.g. "เเมษายน"
+  const name = filename.replace(/\.png$/i, '').trim().replace(/เเ/g, 'เ');
   const dateMatch = name.match(/วันที่\s+(\d+)\s+([^\(]+)/);
   const sessionMatch = name.match(/\((เช้า|บ่าย)\)/);
   const subjectMatch = name.match(/วิชา\s+(.+)$/);
   const day = dateMatch ? dateMatch[1].trim() : '';
-  const date = dateMatch ? `${dateMatch[1].trim()} ${dateMatch[2].trim()}` : name;
+  const monthFull = dateMatch ? dateMatch[2].trim().split(/\s+/)[0] : '';
+  const monthAbbr = THAI_MONTHS[monthFull] || monthFull;
+  const date = dateMatch ? `${day} ${monthFull} ${dateMatch[2].trim().split(/\s+/)[1] || ''}`.trim() : name;
   const session = sessionMatch ? sessionMatch[1] : '';
   const subject = subjectMatch ? subjectMatch[1].trim() : name;
-  return { date, day, session, subject };
+  return { date, day, monthAbbr, session, subject };
 }
 
 app.use(express.static(path.join(__dirname, 'public')));
