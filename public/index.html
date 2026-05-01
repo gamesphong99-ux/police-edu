@@ -630,13 +630,9 @@
 <div class="controls">
   <div class="controls-inner">
     <span class="filter-label">กรองตามวัน:</span>
-    <button class="filter-btn active" data-filter="all" onclick="setFilter('all', this)">ทั้งหมด</button>
-    <button class="filter-btn" data-filter="23" onclick="setFilter('23', this)">23 เม.ย.</button>
-    <button class="filter-btn" data-filter="24" onclick="setFilter('24', this)">24 เม.ย.</button>
-    <button class="filter-btn" data-filter="27" onclick="setFilter('27', this)">27 เม.ย.</button>
-    <button class="filter-btn" data-filter="28" onclick="setFilter('28', this)">28 เม.ย.</button>
-    <button class="filter-btn" data-filter="29" onclick="setFilter('29', this)">29 เม.ย.</button>
-    <button class="filter-btn" data-filter="30" onclick="setFilter('30', this)">30 เม.ย.</button>
+    <div id="filter-btns">
+      <button class="filter-btn active" onclick="setFilter('all', this)">ทั้งหมด</button>
+    </div>
     <div class="search-box">
       <span class="search-icon">🔍</span>
       <input type="text" id="search-input" placeholder="ค้นหาวิชา..." oninput="onSearch(this.value)" />
@@ -678,47 +674,82 @@
 </footer>
 
 <script>
-  // ===== DATA =====
-  const lessons = [
-    { img: "23-บ่าย-อาวุธปืน.png",        date: "23 เมษายน 2569", day: "23", session: "บ่าย", subject: "การทำสำนวนอาวุธปืน" },
-    { img: "24-เช้า-อาวุธปืน.png",         date: "24 เมษายน 2569", day: "24", session: "เช้า", subject: "การทำสำนวนอาวุธปืน" },
-    { img: "24-บ่าย-ทรัพย์สินทางปัญญา.png", date: "24 เมษายน 2569", day: "24", session: "บ่าย", subject: "กฎหมายทรัพย์สินทางปัญญาและการค้าระหว่างประเทศ" },
-    { img: "27-เช้า-ศาลแขวง.png",           date: "27 เมษายน 2569", day: "27", session: "เช้า", subject: "พ.ร.บ. จัดตั้งศาลแขวงและวิธีพิจารณาความอาญาในศาลแขวง" },
-    { img: "27-บ่าย-ศาลแขวง.png",           date: "27 เมษายน 2569", day: "27", session: "บ่าย", subject: "พ.ร.บ. จัดตั้งศาลแขวงและวิธีพิจารณาความอาญาในศาลแขวง" },
-    { img: "28-เช้า-ปอาญา.png",             date: "28 เมษายน 2569", day: "28", session: "เช้า", subject: "องค์ประกอบข้อกฎหมายและการตั้งประเด็นการสอบสวน ตาม ป.อาญา ภาค 2 ลักษณะ 6 (ความผิดเกี่ยวกับภยันตราย)" },
-    { img: "28-บ่าย-ค้ามนุษย์.png",         date: "28 เมษายน 2569", day: "28", session: "บ่าย", subject: "กฎหมายว่าด้วยการป้องกันและปราบปรามการค้ามนุษย์" },
-    { img: "29-เช้า-ความผิดเพศ.png",        date: "29 เมษายน 2569", day: "29", session: "เช้า", subject: "การตั้งประเด็นการสอบสวนความผิดเกี่ยวกับเพศ" },
-    { img: "29-บ่าย-ทุจริต.png",            date: "29 เมษายน 2569", day: "29", session: "บ่าย", subject: "กฎหมายทุจริตคอรัปชั่น" },
-    { img: "30-เช้า-พยานหลักฐาน.png",       date: "30 เมษายน 2569", day: "30", session: "เช้า", subject: "กฎหมายว่าด้วยพยานหลักฐาน (วิวัฒนาการและมาตรฐานสากล)" },
-  ];
-
-  function imgUrl(img) {
-    return `images/${encodeURIComponent(img)}`;
-  }
-
-  function driveUrl(img) {
-    return `images/${encodeURIComponent(img)}`;
-  }
-
   // ===== STATE =====
+  let allLessons = [];
   let activeFilter = "all";
   let searchQuery = "";
   let currentModalIndex = -1;
   let filteredFlat = [];
 
+  // ===== API =====
+  async function loadLessons() {
+    const container = document.getElementById("main-content");
+    container.innerHTML = `<div class="empty-state"><div class="icon">⏳</div><h3>กำลังโหลดบทเรียน...</h3></div>`;
+    try {
+      const res = await fetch("/api/lessons");
+      if (!res.ok) throw new Error("API error " + res.status);
+      allLessons = await res.json();
+      updateStats();
+      buildFilterButtons();
+      render();
+    } catch (err) {
+      container.innerHTML = `<div class="empty-state"><div class="icon">⚠️</div><h3>โหลดไม่สำเร็จ</h3><p>${err.message}</p></div>`;
+    }
+  }
+
+  function updateStats() {
+    const days = new Set(allLessons.map(l => l.day)).size;
+    const subjects = new Set(allLessons.map(l => l.subject)).size;
+    document.getElementById("total-lessons").textContent = allLessons.length;
+    document.getElementById("total-days").textContent = days;
+    document.getElementById("total-subjects").textContent = subjects;
+  }
+
+  function buildFilterButtons() {
+    const days = [...new Set(allLessons.map(l => l.day))].sort((a, b) => +a - +b);
+    const monthMap = { "1":"ม.ค.","2":"ก.พ.","3":"มี.ค.","4":"เม.ย.","5":"พ.ค.","6":"มิ.ย.",
+                       "7":"ก.ค.","8":"ส.ค.","9":"ก.ย.","10":"ต.ค.","11":"พ.ย.","12":"ธ.ค." };
+    const container = document.getElementById("filter-btns");
+    const allBtn = container.querySelector('[onclick*="all"]');
+    container.innerHTML = "";
+    container.appendChild(allBtn);
+    days.forEach(day => {
+      const sample = allLessons.find(l => l.day === day);
+      const monthMatch = sample?.date.match(/\d+\s+(\S+)\s+/);
+      const monthTh = monthMatch ? monthMatch[1].slice(0, 3) + "." : "";
+      const btn = document.createElement("button");
+      btn.className = "filter-btn";
+      btn.textContent = `${day} ${monthTh}`;
+      btn.onclick = function() { setFilter(day, this); };
+      container.appendChild(btn);
+    });
+  }
+
+  // ===== FILTER =====
   function getFiltered() {
-    return lessons.filter(l => {
+    return allLessons.filter(l => {
       const matchDay = activeFilter === "all" || l.day === activeFilter;
       const matchSearch = !searchQuery || l.subject.toLowerCase().includes(searchQuery) || l.date.includes(searchQuery);
       return matchDay && matchSearch;
     });
   }
 
+  function setFilter(val, btn) {
+    activeFilter = val;
+    document.querySelectorAll(".filter-btn").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    render();
+  }
+
+  function onSearch(val) {
+    searchQuery = val.trim().toLowerCase();
+    render();
+  }
+
   // ===== RENDER =====
   function render() {
     const filtered = getFiltered();
     filteredFlat = filtered;
-
     const container = document.getElementById("main-content");
 
     if (filtered.length === 0) {
@@ -731,7 +762,6 @@
       return;
     }
 
-    // Group by date
     const groups = {};
     filtered.forEach(l => {
       if (!groups[l.date]) groups[l.date] = [];
@@ -761,7 +791,7 @@
     return `
       <div class="lesson-card" onclick="openModal(${idx})">
         <div class="card-thumb">
-          <img src="${imgUrl(l.img)}" alt="${l.subject}" loading="lazy"
+          <img src="/api/image/${l.id}" alt="${l.subject}" loading="lazy"
                onerror="this.style.display='none';this.parentElement.style.background='#eef0f4';" />
           <div class="card-thumb-overlay">
             <button class="view-btn">👁️ ดูเนื้อหา</button>
@@ -776,19 +806,6 @@
           </div>
         </div>
       </div>`;
-  }
-
-  // ===== FILTER =====
-  function setFilter(val, btn) {
-    activeFilter = val;
-    document.querySelectorAll(".filter-btn").forEach(b => b.classList.remove("active"));
-    btn.classList.add("active");
-    render();
-  }
-
-  function onSearch(val) {
-    searchQuery = val.trim().toLowerCase();
-    render();
   }
 
   // ===== MODAL =====
@@ -819,17 +836,14 @@
   function updateModal() {
     const l = filteredFlat[currentModalIndex];
     if (!l) return;
-
     document.getElementById("modal-title").textContent = l.subject;
     document.getElementById("modal-sub").textContent = `${l.date} | ช่วง${l.session}`;
-    document.getElementById("modal-img").src = imgUrl(l.img);
-    document.getElementById("modal-drive-link").href = driveUrl(l.img);
-
+    document.getElementById("modal-img").src = `/api/image/${l.id}`;
+    document.getElementById("modal-drive-link").href = `https://drive.google.com/file/d/${l.id}/view`;
     document.getElementById("prev-btn").disabled = currentModalIndex === 0;
     document.getElementById("next-btn").disabled = currentModalIndex === filteredFlat.length - 1;
   }
 
-  // Keyboard navigation
   document.addEventListener("keydown", e => {
     if (!document.getElementById("modal").classList.contains("open")) return;
     if (e.key === "Escape") closeModal();
@@ -838,7 +852,7 @@
   });
 
   // ===== INIT =====
-  render();
+  loadLessons();
 </script>
 </body>
 </html>
