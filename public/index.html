@@ -680,84 +680,24 @@
 <script>
   // ===== DATA =====
   const lessons = [
-    {
-      id: "1RCYOSnS19m49CyJXGdEoZdH2xVfBZech",
-      date: "23 เมษายน 2569",
-      day: "23",
-      session: "บ่าย",
-      subject: "การทำสำนวนอาวุธปืน",
-    },
-    {
-      id: "116vYZBPcziRhSQxBrSLlaT1Sh85B1dWc",
-      date: "24 เมษายน 2569",
-      day: "24",
-      session: "เช้า",
-      subject: "การทำสำนวนอาวุธปืน",
-    },
-    {
-      id: "1_jxpmrk5bZuiBca8CfIst7HehzeGRrOz",
-      date: "24 เมษายน 2569",
-      day: "24",
-      session: "บ่าย",
-      subject: "กฎหมายทรัพย์สินทางปัญญาและการค้าระหว่างประเทศ",
-    },
-    {
-      id: "1KeFRzN25_xPn8vCuG69ZJRJT9OR_Fy6Z",
-      date: "27 เมษายน 2569",
-      day: "27",
-      session: "เช้า",
-      subject: "พ.ร.บ. จัดตั้งศาลแขวงและวิธีพิจารณาความอาญาในศาลแขวง",
-    },
-    {
-      id: "1peF0AlzJ7QVgSt4_URhNmf42k1w0_xI3",
-      date: "27 เมษายน 2569",
-      day: "27",
-      session: "บ่าย",
-      subject: "พ.ร.บ. จัดตั้งศาลแขวงและวิธีพิจารณาความอาญาในศาลแขวง",
-    },
-    {
-      id: "1P-DoVH_jEVhLvHGewK2yXTaqTZO8lLFY",
-      date: "28 เมษายน 2569",
-      day: "28",
-      session: "เช้า",
-      subject: "องค์ประกอบข้อกฎหมายและการตั้งประเด็นการสอบสวน ตาม ป.อาญา ภาค 2 ลักษณะ 6 (ความผิดเกี่ยวกับภยันตราย)",
-    },
-    {
-      id: "11Qh1VgaOC5L45T7xE_N7oanKu41048w_",
-      date: "28 เมษายน 2569",
-      day: "28",
-      session: "บ่าย",
-      subject: "กฎหมายว่าด้วยการป้องกันและปราบปรามการค้ามนุษย์",
-    },
-    {
-      id: "1kORk6hN5uzTG-6gNmy5uuQQZJhHec5qv",
-      date: "29 เมษายน 2569",
-      day: "29",
-      session: "เช้า",
-      subject: "การตั้งประเด็นการสอบสวนความผิดเกี่ยวกับเพศ",
-    },
-    {
-      id: "1l6bzTsaHYWVYiSgRScQFZAU8tidE_oKU",
-      date: "29 เมษายน 2569",
-      day: "29",
-      session: "บ่าย",
-      subject: "กฎหมายทุจริตคอรัปชั่น",
-    },
-    {
-      id: "1eZMMCK8VA4mamnR2_QEDl0p5DUBygeIb",
-      date: "30 เมษายน 2569",
-      day: "30",
-      session: "เช้า",
-      subject: "กฎหมายว่าด้วยพยานหลักฐาน (วิวัฒนาการและมาตรฐานสากล)",
-    },
+    { img: "23-บ่าย-อาวุธปืน.png",        date: "23 เมษายน 2569", day: "23", session: "บ่าย", subject: "การทำสำนวนอาวุธปืน" },
+    { img: "24-เช้า-อาวุธปืน.png",         date: "24 เมษายน 2569", day: "24", session: "เช้า", subject: "การทำสำนวนอาวุธปืน" },
+    { img: "24-บ่าย-ทรัพย์สินทางปัญญา.png", date: "24 เมษายน 2569", day: "24", session: "บ่าย", subject: "กฎหมายทรัพย์สินทางปัญญาและการค้าระหว่างประเทศ" },
+    { img: "27-เช้า-ศาลแขวง.png",           date: "27 เมษายน 2569", day: "27", session: "เช้า", subject: "พ.ร.บ. จัดตั้งศาลแขวงและวิธีพิจารณาความอาญาในศาลแขวง" },
+    { img: "27-บ่าย-ศาลแขวง.png",           date: "27 เมษายน 2569", day: "27", session: "บ่าย", subject: "พ.ร.บ. จัดตั้งศาลแขวงและวิธีพิจารณาความอาญาในศาลแขวง" },
+    { img: "28-เช้า-ปอาญา.png",             date: "28 เมษายน 2569", day: "28", session: "เช้า", subject: "องค์ประกอบข้อกฎหมายและการตั้งประเด็นการสอบสวน ตาม ป.อาญา ภาค 2 ลักษณะ 6 (ความผิดเกี่ยวกับภยันตราย)" },
+    { img: "28-บ่าย-ค้ามนุษย์.png",         date: "28 เมษายน 2569", day: "28", session: "บ่าย", subject: "กฎหมายว่าด้วยการป้องกันและปราบปรามการค้ามนุษย์" },
+    { img: "29-เช้า-ความผิดเพศ.png",        date: "29 เมษายน 2569", day: "29", session: "เช้า", subject: "การตั้งประเด็นการสอบสวนความผิดเกี่ยวกับเพศ" },
+    { img: "29-บ่าย-ทุจริต.png",            date: "29 เมษายน 2569", day: "29", session: "บ่าย", subject: "กฎหมายทุจริตคอรัปชั่น" },
+    { img: "30-เช้า-พยานหลักฐาน.png",       date: "30 เมษายน 2569", day: "30", session: "เช้า", subject: "กฎหมายว่าด้วยพยานหลักฐาน (วิวัฒนาการและมาตรฐานสากล)" },
   ];
 
-  function imgUrl(fileId) {
-    return `https://lh3.googleusercontent.com/d/${fileId}=w1200`;
+  function imgUrl(img) {
+    return `images/${encodeURIComponent(img)}`;
   }
 
-  function driveUrl(fileId) {
-    return `https://drive.google.com/file/d/${fileId}/view`;
+  function driveUrl(img) {
+    return `images/${encodeURIComponent(img)}`;
   }
 
   // ===== STATE =====
@@ -821,7 +761,7 @@
     return `
       <div class="lesson-card" onclick="openModal(${idx})">
         <div class="card-thumb">
-          <img src="${imgUrl(l.id)}" alt="${l.subject}" loading="lazy"
+          <img src="${imgUrl(l.img)}" alt="${l.subject}" loading="lazy"
                onerror="this.style.display='none';this.parentElement.style.background='#eef0f4';" />
           <div class="card-thumb-overlay">
             <button class="view-btn">👁️ ดูเนื้อหา</button>
@@ -882,8 +822,8 @@
 
     document.getElementById("modal-title").textContent = l.subject;
     document.getElementById("modal-sub").textContent = `${l.date} | ช่วง${l.session}`;
-    document.getElementById("modal-img").src = imgUrl(l.id);
-    document.getElementById("modal-drive-link").href = driveUrl(l.id);
+    document.getElementById("modal-img").src = imgUrl(l.img);
+    document.getElementById("modal-drive-link").href = driveUrl(l.img);
 
     document.getElementById("prev-btn").disabled = currentModalIndex === 0;
     document.getElementById("next-btn").disabled = currentModalIndex === filteredFlat.length - 1;
