@@ -4,75 +4,121 @@ const { google } = require('googleapis');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const FOLDER_ID = '1HpjSU9TZbNMGottB94BUkVSLJ9sDHoJx';
-const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+const PARENT_FOLDER_ID = '1TGIQwMeSO1Jv-_74cBS5h818jmHWr5EL';
+const CACHE_TTL = 5 * 60 * 1000;
 
-let lessonsCache = null;
-let cacheTime = 0;
+const cache = {};   // { key: { data, ts } }
+
+function getCache(key) {
+  const c = cache[key];
+  return c && Date.now() - c.ts < CACHE_TTL ? c.data : null;
+}
+function setCache(key, data) {
+  cache[key] = { data, ts: Date.now() };
+}
 
 function getDrive() {
   const raw = process.env.GOOGLE_SERVICE_ACCOUNT_JSON;
   if (!raw) throw new Error('GOOGLE_SERVICE_ACCOUNT_JSON env var not set');
-  const credentials = JSON.parse(raw);
   const auth = new google.auth.GoogleAuth({
-    credentials,
+    credentials: JSON.parse(raw),
     scopes: ['https://www.googleapis.com/auth/drive.readonly'],
   });
   return google.drive({ version: 'v3', auth });
 }
 
-const THAI_MONTHS = {
+// ── Month maps ───────────────────────────────────────────
+const MONTHS_FULL = {
   'มกราคม':'ม.ค.','กุมภาพันธ์':'ก.พ.','มีนาคม':'มี.ค.','เมษายน':'เม.ย.',
   'พฤษภาคม':'พ.ค.','มิถุนายน':'มิ.ย.','กรกฎาคม':'ก.ค.','สิงหาคม':'ส.ค.',
   'กันยายน':'ก.ย.','ตุลาคม':'ต.ค.','พฤศจิกายน':'พ.ย.','ธันวาคม':'ธ.ค.',
 };
 
 function parseFilename(filename) {
-  // normalize double sara-e (เเ → แ → เม) used in some filenames e.g. "เเมษายน"
+  // normalize double sara-e  เเ → เ
   const name = filename.replace(/\.png$/i, '').trim().replace(/เเ/g, 'เ');
-  const dateMatch = name.match(/วันที่\s+(\d+)\s+([^\(]+)/);
+
   const sessionMatch = name.match(/\((เช้า|บ่าย)\)/);
   const subjectMatch = name.match(/วิชา\s+(.+)$/);
-  const day = dateMatch ? dateMatch[1].trim() : '';
-  const monthFull = dateMatch ? dateMatch[2].trim().split(/\s+/)[0] : '';
-  const monthAbbr = THAI_MONTHS[monthFull] || monthFull;
-  const date = dateMatch ? `${day} ${monthFull} ${dateMatch[2].trim().split(/\s+/)[1] || ''}`.trim() : name;
   const session = sessionMatch ? sessionMatch[1] : '';
   const subject = subjectMatch ? subjectMatch[1].trim() : name;
+
+  let day = '', date = '', monthAbbr = '';
+
+  // Pattern 1 — full month: "วันที่ 30 เมษายน 2569"
+  const m1 = name.match(/วันที่\s+(\d+)\s+([฀-๿]+)\s+(\d{4})/);
+  if (m1) {
+    day = m1[1];
+    const mFull = m1[2];
+    monthAbbr = MONTHS_FULL[mFull] || mFull;
+    date = `${day} ${mFull} ${m1[3]}`;
+  } else {
+    // Pattern 2 — abbreviated: "วันที่ 4 พ.ค.69"
+    const m2 = name.match(/วันที่\s+(\d+)\s+([฀-๿]+\.[฀-๿]*\.?)(\d{2})/);
+    if (m2) {
+      day = m2[1];
+      monthAbbr = m2[2].endsWith('.') ? m2[2] : m2[2] + '.';
+      date = `${day} ${monthAbbr} 25${m2[3]}`;
+    }
+  }
+
   return { date, day, monthAbbr, session, subject };
 }
 
+// ── Static files ─────────────────────────────────────────
 app.use(express.static(path.join(__dirname, 'public')));
 
-// List all lessons from Drive folder
-app.get('/api/lessons', async (req, res) => {
+// ── GET /api/courses ─────────────────────────────────────
+app.get('/api/courses', async (req, res) => {
+  const cacheKey = 'courses';
+  const cached = getCache(cacheKey);
+  if (cached) return res.json(cached);
   try {
-    const now = Date.now();
-    if (lessonsCache && now - cacheTime < CACHE_TTL) {
-      return res.json(lessonsCache);
-    }
     const drive = getDrive();
     const result = await drive.files.list({
-      q: `'${FOLDER_ID}' in parents and mimeType contains 'image/' and trashed = false`,
-      fields: 'files(id, name, createdTime, modifiedTime)',
+      q: `'${PARENT_FOLDER_ID}' in parents and mimeType = 'application/vnd.google-apps.folder' and trashed = false`,
+      fields: 'files(id, name)',
       orderBy: 'name',
-      pageSize: 200,
+      pageSize: 50,
     });
-    const lessons = result.data.files.map(f => ({
-      id: f.id,
-      ...parseFilename(f.name),
-    })).filter(l => l.day);
-
-    lessonsCache = lessons;
-    cacheTime = now;
-    res.json(lessons);
+    const courses = result.data.files.map(f => ({ id: f.id, name: f.name }));
+    setCache(cacheKey, courses);
+    res.json(courses);
   } catch (err) {
-    console.error('Drive API error:', err.message);
+    console.error('courses error:', err.message);
     res.status(500).json({ error: err.message });
   }
 });
 
-// Proxy image from Drive (with 1-day cache)
+// ── GET /api/lessons?courseId=xxx ────────────────────────
+app.get('/api/lessons', async (req, res) => {
+  const folderId = req.query.courseId;
+  if (!folderId) return res.status(400).json({ error: 'courseId required' });
+
+  const cacheKey = `lessons_${folderId}`;
+  const cached = getCache(cacheKey);
+  if (cached) return res.json(cached);
+
+  try {
+    const drive = getDrive();
+    const result = await drive.files.list({
+      q: `'${folderId}' in parents and mimeType contains 'image/' and trashed = false`,
+      fields: 'files(id, name, createdTime)',
+      orderBy: 'name',
+      pageSize: 200,
+    });
+    const lessons = result.data.files
+      .map(f => ({ id: f.id, ...parseFilename(f.name) }))
+      .filter(l => l.day);
+    setCache(cacheKey, lessons);
+    res.json(lessons);
+  } catch (err) {
+    console.error('lessons error:', err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ── GET /api/image/:fileId ───────────────────────────────
 app.get('/api/image/:fileId', async (req, res) => {
   try {
     const drive = getDrive();
@@ -84,7 +130,7 @@ app.get('/api/image/:fileId', async (req, res) => {
     res.setHeader('Cache-Control', 'public, max-age=86400');
     file.data.pipe(res);
   } catch (err) {
-    console.error('Image proxy error:', err.message);
+    console.error('image error:', err.message);
     res.status(404).send('Not found');
   }
 });
@@ -93,6 +139,4 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+app.listen(PORT, () => console.log(`Server on port ${PORT}`));

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ระบบสื่อการเรียนการสอน | ปสส.รุ่นที่ 15 (นรต.79)</title>
+  <title>ระบบสื่อการเรียนการสอน | สบส.</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
   <style>
@@ -575,11 +575,46 @@
       font-weight: 600;
     }
 
+    /* ===== COURSE TABS ===== */
+    .course-tabs {
+      background: rgba(0,0,0,0.25);
+      border-top: 1px solid rgba(255,255,255,0.1);
+      padding: 0 32px;
+    }
+    .course-tabs-inner {
+      max-width: 1280px;
+      margin: 0 auto;
+      display: flex;
+      gap: 4px;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .course-tabs-inner::-webkit-scrollbar { display: none; }
+    .course-tab {
+      padding: 12px 22px;
+      border: none;
+      background: transparent;
+      color: rgba(255,255,255,0.6);
+      font-family: 'Sarabun', sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      white-space: nowrap;
+      transition: all 0.18s;
+    }
+    .course-tab:hover { color: rgba(255,255,255,0.9); }
+    .course-tab.active {
+      color: var(--gold-light);
+      border-bottom-color: var(--gold);
+    }
+
     /* ===== RESPONSIVE ===== */
     @media (max-width: 640px) {
       .header-inner { padding: 14px 18px; }
       .hero { padding: 20px 18px; }
       .hero-info h2 { font-size: 20px; }
+      .course-tabs { padding: 0 18px; }
       .controls { padding: 12px 18px; top: 86px; }
       .main { padding: 20px 18px; }
       .card-grid { grid-template-columns: 1fr; }
@@ -597,7 +632,13 @@
     <div class="header-badge">🚔</div>
     <div class="header-text">
       <h1>ระบบสื่อการเรียนการสอน</h1>
-      <p>พนักงานสอบสวน | ปสส. รุ่นที่ 15 (นรต.79)</p>
+      <p>สำนักงานพัฒนาการสืบสวนสอบสวน (สบส.)</p>
+    </div>
+  </div>
+  <!-- COURSE TABS -->
+  <div class="course-tabs">
+    <div class="course-tabs-inner" id="course-tabs">
+      <span style="color:rgba(255,255,255,0.4);padding:12px 0;font-size:13px;">⏳ กำลังโหลดหลักสูตร...</span>
     </div>
   </div>
 </header>
@@ -606,20 +647,20 @@
 <div class="hero">
   <div class="hero-inner">
     <div class="hero-info">
-      <h2>ปสส. รุ่นที่ 15 (นรต.79)</h2>
-      <p>ผอ.หลักสูตร: พ.ต.อ.อุเทน นุ้ยพิน &nbsp;|&nbsp; ข้อมูล ณ เดือนเมษายน 2569</p>
+      <h2 id="hero-title">—</h2>
+      <p id="hero-sub">กรุณาเลือกหลักสูตร</p>
     </div>
     <div class="stats-row">
       <div class="stat-card">
-        <div class="num" id="total-lessons">10</div>
+        <div class="num" id="total-lessons">—</div>
         <div class="label">บทเรียนทั้งหมด</div>
       </div>
       <div class="stat-card">
-        <div class="num" id="total-days">6</div>
+        <div class="num" id="total-days">—</div>
         <div class="label">วันเรียน</div>
       </div>
       <div class="stat-card">
-        <div class="num" id="total-subjects">8</div>
+        <div class="num" id="total-subjects">—</div>
         <div class="label">วิชา</div>
       </div>
     </div>
@@ -670,54 +711,110 @@
 
 <!-- FOOTER -->
 <footer>
-  <p>ระบบสื่อการเรียนการสอน | <span>ปสส. รุ่นที่ 15 (นรต.79)</span> | พัฒนาโดย Claude AI</p>
+  <p>ระบบสื่อการเรียนการสอน | <span>สำนักงานพัฒนาการสืบสวนสอบสวน (สบส.)</span> | พัฒนาโดย Claude AI</p>
 </footer>
 
 <script>
   // ===== STATE =====
-  let allLessons = [];
-  let activeFilter = "all";
-  let searchQuery = "";
+  let allLessons    = [];
+  let activeFilter  = "all";
+  let searchQuery   = "";
   let currentModalIndex = -1;
-  let filteredFlat = [];
+  let filteredFlat  = [];
+  let currentCourseId = null;
 
-  // ===== API =====
-  async function loadLessons() {
+  // ===== COURSES =====
+  async function loadCourses() {
+    try {
+      const res = await fetch("/api/courses");
+      const courses = await res.json();
+      buildCourseTabs(courses);
+      if (courses.length > 0) selectCourse(courses[0].id, courses[0].name);
+    } catch (err) {
+      document.getElementById("course-tabs").innerHTML =
+        `<span style="color:rgba(255,255,255,0.5);padding:12px 0;font-size:13px;">⚠️ โหลดหลักสูตรไม่สำเร็จ</span>`;
+    }
+  }
+
+  function buildCourseTabs(courses) {
+    const container = document.getElementById("course-tabs");
+    container.innerHTML = "";
+    courses.forEach((c, i) => {
+      const btn = document.createElement("button");
+      btn.className = "course-tab" + (i === 0 ? " active" : "");
+      btn.textContent = c.name;
+      btn.dataset.id = c.id;
+      btn.onclick = () => {
+        document.querySelectorAll(".course-tab").forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        selectCourse(c.id, c.name);
+      };
+      container.appendChild(btn);
+    });
+  }
+
+  function selectCourse(courseId, courseName) {
+    currentCourseId = courseId;
+    document.getElementById("hero-title").textContent = courseName;
+    document.getElementById("hero-sub").textContent   = "กำลังโหลดบทเรียน...";
+    document.getElementById("search-input").value = "";
+    searchQuery  = "";
+    activeFilter = "all";
+    loadLessons(courseId);
+  }
+
+  // ===== LESSONS =====
+  async function loadLessons(courseId) {
     const container = document.getElementById("main-content");
     container.innerHTML = `<div class="empty-state"><div class="icon">⏳</div><h3>กำลังโหลดบทเรียน...</h3></div>`;
     try {
-      const res = await fetch("/api/lessons");
+      const res = await fetch(`/api/lessons?courseId=${courseId}`);
       if (!res.ok) throw new Error("API error " + res.status);
       allLessons = await res.json();
       updateStats();
       buildFilterButtons();
       render();
+      const days = new Set(allLessons.map(l => l.date));
+      document.getElementById("hero-sub").textContent =
+        `${allLessons.length} บทเรียน | ${days.size} วันเรียน`;
     } catch (err) {
       container.innerHTML = `<div class="empty-state"><div class="icon">⚠️</div><h3>โหลดไม่สำเร็จ</h3><p>${err.message}</p></div>`;
     }
   }
 
   function updateStats() {
-    const days = new Set(allLessons.map(l => l.day)).size;
+    const days     = new Set(allLessons.map(l => l.day)).size;
     const subjects = new Set(allLessons.map(l => l.subject)).size;
-    document.getElementById("total-lessons").textContent = allLessons.length;
-    document.getElementById("total-days").textContent = days;
+    document.getElementById("total-lessons").textContent  = allLessons.length;
+    document.getElementById("total-days").textContent     = days;
     document.getElementById("total-subjects").textContent = subjects;
   }
 
   function buildFilterButtons() {
-    const days = [...new Set(allLessons.map(l => l.day))].sort((a, b) => +a - +b);
+    // group by day+month to avoid day-number collision across months
+    const seen = new Map();
+    allLessons.forEach(l => {
+      const key = l.day + "_" + l.monthAbbr;
+      if (!seen.has(key)) seen.set(key, l);
+    });
+    const entries = [...seen.values()].sort((a, b) => {
+      const da = new Date(a.date); const db = new Date(b.date);
+      return isNaN(da) || isNaN(db) ? a.date.localeCompare(b.date) : da - db;
+    });
+
     const container = document.getElementById("filter-btns");
     const allBtn = container.querySelector('[onclick*="all"]');
+    allBtn.classList.add("active");
     container.innerHTML = "";
     container.appendChild(allBtn);
-    days.forEach(day => {
-      const sample = allLessons.find(l => l.day === day);
-      const label = sample?.monthAbbr ? `${day} ${sample.monthAbbr}` : day;
+
+    entries.forEach(l => {
+      const label = l.monthAbbr ? `${l.day} ${l.monthAbbr}` : l.day;
       const btn = document.createElement("button");
       btn.className = "filter-btn";
       btn.textContent = label;
-      btn.onclick = function() { setFilter(day, this); };
+      btn.dataset.day = l.day;
+      btn.onclick = function() { setFilter(l.day, this); };
       container.appendChild(btn);
     });
   }
@@ -725,8 +822,10 @@
   // ===== FILTER =====
   function getFiltered() {
     return allLessons.filter(l => {
-      const matchDay = activeFilter === "all" || l.day === activeFilter;
-      const matchSearch = !searchQuery || l.subject.toLowerCase().includes(searchQuery) || l.date.includes(searchQuery);
+      const matchDay    = activeFilter === "all" || l.day === activeFilter;
+      const matchSearch = !searchQuery ||
+        l.subject.toLowerCase().includes(searchQuery) ||
+        l.date.includes(searchQuery);
       return matchDay && matchSearch;
     });
   }
@@ -746,7 +845,7 @@
   // ===== RENDER =====
   function render() {
     const filtered = getFiltered();
-    filteredFlat = filtered;
+    filteredFlat   = filtered;
     const container = document.getElementById("main-content");
 
     if (filtered.length === 0) {
@@ -784,7 +883,7 @@
 
   function cardHtml(l, idx) {
     const sessionClass = l.session === "เช้า" ? "morning" : "afternoon";
-    const sessionIcon = l.session === "เช้า" ? "☀️" : "🌤️";
+    const sessionIcon  = l.session === "เช้า" ? "☀️" : "🌤️";
     return `
       <div class="lesson-card" onclick="openModal(${idx})">
         <div class="card-thumb">
@@ -834,22 +933,22 @@
     const l = filteredFlat[currentModalIndex];
     if (!l) return;
     document.getElementById("modal-title").textContent = l.subject;
-    document.getElementById("modal-sub").textContent = `${l.date} | ช่วง${l.session}`;
-    document.getElementById("modal-img").src = `/api/image/${l.id}`;
-    document.getElementById("modal-drive-link").href = `https://drive.google.com/file/d/${l.id}/view`;
+    document.getElementById("modal-sub").textContent   = `${l.date} | ช่วง${l.session}`;
+    document.getElementById("modal-img").src           = `/api/image/${l.id}`;
+    document.getElementById("modal-drive-link").href   = `https://drive.google.com/file/d/${l.id}/view`;
     document.getElementById("prev-btn").disabled = currentModalIndex === 0;
     document.getElementById("next-btn").disabled = currentModalIndex === filteredFlat.length - 1;
   }
 
   document.addEventListener("keydown", e => {
     if (!document.getElementById("modal").classList.contains("open")) return;
-    if (e.key === "Escape") closeModal();
-    if (e.key === "ArrowLeft") navigateModal(-1);
+    if (e.key === "Escape")     closeModal();
+    if (e.key === "ArrowLeft")  navigateModal(-1);
     if (e.key === "ArrowRight") navigateModal(1);
   });
 
   // ===== INIT =====
-  loadLessons();
+  loadCourses();
 </script>
 </body>
 </html>
