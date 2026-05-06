@@ -642,7 +642,24 @@
 
     /* ===== RESPONSIVE ===== */
     @media (max-width: 640px) {
-      .header-inner { padding: 14px 18px; }
+      .header-inner {
+        padding: 10px 14px;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+      .header-badge { width: 48px; height: 48px; }
+      .header-text h1 { font-size: 15px; }
+      .header-text p { font-size: 11px; }
+      .header-credit {
+        width: 100%;
+        justify-content: flex-end;
+        border-top: 1px solid rgba(255,255,255,0.1);
+        padding-top: 8px;
+        gap: 8px;
+      }
+      .header-credit-photo { width: 36px; height: 36px; }
+      .header-credit-text p { font-size: 10px; }
+      .header-credit-text strong { font-size: 11px; }
       .hero { padding: 20px 18px; }
       .hero-info h2 { font-size: 20px; }
       .course-tabs { padding: 0 18px; }
