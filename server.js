@@ -33,6 +33,10 @@ const MONTHS_FULL = {
   'พฤษภาคม':'พ.ค.','มิถุนายน':'มิ.ย.','กรกฎาคม':'ก.ค.','สิงหาคม':'ส.ค.',
   'กันยายน':'ก.ย.','ตุลาคม':'ต.ค.','พฤศจิกายน':'พ.ย.','ธันวาคม':'ธ.ค.',
 };
+const MONTH_NUM = {
+  'ม.ค.':1,'ก.พ.':2,'มี.ค.':3,'เม.ย.':4,'พ.ค.':5,'มิ.ย.':6,
+  'ก.ค.':7,'ส.ค.':8,'ก.ย.':9,'ต.ค.':10,'พ.ย.':11,'ธ.ค.':12,
+};
 
 function parseFilename(filename) {
   // normalize double sara-e  เเ → เ
@@ -43,7 +47,7 @@ function parseFilename(filename) {
   const session = sessionMatch ? sessionMatch[1] : '';
   const subject = subjectMatch ? subjectMatch[1].trim() : name;
 
-  let day = '', date = '', monthAbbr = '';
+  let day = '', date = '', monthAbbr = '', sortKey = 0;
 
   // Pattern 1 — full month: "วันที่ 30 เมษายน 2569"
   const m1 = name.match(/วันที่\s+(\d+)\s+([฀-๿]+)\s+(\d{4})/);
@@ -52,6 +56,9 @@ function parseFilename(filename) {
     const mFull = m1[2];
     monthAbbr = MONTHS_FULL[mFull] || mFull;
     date = `${day} ${mFull} ${m1[3]}`;
+    const yr = parseInt(m1[3]);
+    const mo = MONTH_NUM[monthAbbr] || 0;
+    sortKey = yr * 10000 + mo * 100 + parseInt(day);
   } else {
     // Pattern 2 — abbreviated: "วันที่ 4 พ.ค.69"
     const m2 = name.match(/วันที่\s+(\d+)\s+([฀-๿]+\.[฀-๿]*\.?)(\d{2})/);
@@ -59,10 +66,13 @@ function parseFilename(filename) {
       day = m2[1];
       monthAbbr = m2[2].endsWith('.') ? m2[2] : m2[2] + '.';
       date = `${day} ${monthAbbr} 25${m2[3]}`;
+      const yr = 2500 + parseInt(m2[3]);
+      const mo = MONTH_NUM[monthAbbr] || 0;
+      sortKey = yr * 10000 + mo * 100 + parseInt(day);
     }
   }
 
-  return { date, day, monthAbbr, session, subject };
+  return { date, day, monthAbbr, sortKey, session, subject };
 }
 
 // ── Static files ─────────────────────────────────────────

@@ -848,16 +848,12 @@
   }
 
   function buildFilterButtons() {
-    // group by day+month to avoid day-number collision across months
+    // dedupe by date string, sort by sortKey (YYYYMMDD numeric)
     const seen = new Map();
     allLessons.forEach(l => {
-      const key = l.day + "_" + l.monthAbbr;
-      if (!seen.has(key)) seen.set(key, l);
+      if (!seen.has(l.date)) seen.set(l.date, l);
     });
-    const entries = [...seen.values()].sort((a, b) => {
-      const da = new Date(a.date); const db = new Date(b.date);
-      return isNaN(da) || isNaN(db) ? a.date.localeCompare(b.date) : da - db;
-    });
+    const entries = [...seen.values()].sort((a, b) => a.sortKey - b.sortKey);
 
     const container = document.getElementById("filter-btns");
     const allBtn = container.querySelector('[onclick*="all"]');
@@ -870,21 +866,22 @@
       const btn = document.createElement("button");
       btn.className = "filter-btn";
       btn.textContent = label;
-      btn.dataset.day = l.day;
-      btn.onclick = function() { setFilter(l.day, this); };
+      btn.onclick = function() { setFilter(l.date, this); };
       container.appendChild(btn);
     });
   }
 
   // ===== FILTER =====
   function getFiltered() {
-    return allLessons.filter(l => {
-      const matchDay    = activeFilter === "all" || l.day === activeFilter;
-      const matchSearch = !searchQuery ||
-        l.subject.toLowerCase().includes(searchQuery) ||
-        l.date.includes(searchQuery);
-      return matchDay && matchSearch;
-    });
+    return allLessons
+      .filter(l => {
+        const matchDate   = activeFilter === "all" || l.date === activeFilter;
+        const matchSearch = !searchQuery ||
+          l.subject.toLowerCase().includes(searchQuery) ||
+          l.date.includes(searchQuery);
+        return matchDate && matchSearch;
+      })
+      .sort((a, b) => a.sortKey - b.sortKey || (a.session === 'เช้า' ? -1 : 1));
   }
 
   function setFilter(val, btn) {
