@@ -56,15 +56,28 @@
     }
     .header-credit {
       margin-left: auto;
-      text-align: right;
+      display: flex;
+      align-items: center;
+      gap: 12px;
       flex-shrink: 0;
     }
-    .header-credit p {
+    .header-credit-photo {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid var(--gold);
+      flex-shrink: 0;
+    }
+    .header-credit-text {
+      text-align: right;
+    }
+    .header-credit-text p {
       font-size: 12px;
       color: rgba(255,255,255,0.55);
       line-height: 1.6;
     }
-    .header-credit strong {
+    .header-credit-text strong {
       color: var(--gold-light);
       font-size: 13px;
       font-weight: 600;
@@ -653,9 +666,12 @@
       <p>สถาบันส่งเสริมงานสอบสวน (สบส.)</p>
     </div>
     <div class="header-credit">
-      <p>พัฒนาระบบโดย</p>
-      <strong>พ.ต.อ.อุเทน นุ้ยพิน</strong>
-      <p>ผู้อำนวยการหลักสูตร</p>
+      <div class="header-credit-text">
+        <p>พัฒนาระบบโดย</p>
+        <strong>พ.ต.อ.อุเทน นุ้ยพิน</strong>
+        <p>ผู้อำนวยการหลักสูตร</p>
+      </div>
+      <img src="/director.png" alt="พ.ต.อ.อุเทน นุ้ยพิน" class="header-credit-photo" />
     </div>
   </div>
   <!-- COURSE TABS -->
