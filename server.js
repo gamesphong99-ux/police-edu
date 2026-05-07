@@ -43,14 +43,14 @@ function parseFilename(filename) {
   const name = filename.replace(/\.png$/i, '').trim().replace(/เเ/g, 'เ');
 
   const sessionMatch = name.match(/\((เช้า|บ่าย)\)/);
-  const subjectMatch = name.match(/วิชา\s+(.+)$/);
+  const subjectMatch = name.match(/วิชา\s*(.+)$/);
   const session = sessionMatch ? sessionMatch[1] : '';
   const subject = subjectMatch ? subjectMatch[1].trim() : name;
 
   let day = '', date = '', monthAbbr = '', sortKey = 0;
 
-  // Pattern 1 — full month: "วันที่ 30 เมษายน 2569"
-  const m1 = name.match(/วันที่\s+(\d+)\s+([฀-๿]+)\s+(\d{4})/);
+  // Pattern 1 — full month: "วันที่ 30 เมษายน 2569" OR "30 เมษายน 2569"
+  const m1 = name.match(/(?:วันที่\s+)?(\d+)\s+([฀-๿]+)\s+(\d{4})/);
   if (m1) {
     day = m1[1];
     const mFull = m1[2];
