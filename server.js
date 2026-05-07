@@ -42,14 +42,14 @@ function parseFilename(filename) {
   // normalize double sara-e  เเ → เ
   const name = filename.replace(/\.png$/i, '').trim().replace(/เเ/g, 'เ');
 
-  const sessionMatch = name.match(/\((เช้า|บ่าย)\)/);
+  const sessionMatch = name.match(/\((เช้า(?:-บ่าย)?|ภาคเช้า|ภาคบ่าย|บ่าย)\)/);
   const subjectMatch = name.match(/วิชา\s*(.+)$/);
   const session = sessionMatch ? sessionMatch[1] : '';
   const subject = subjectMatch ? subjectMatch[1].trim() : name;
 
   let day = '', date = '', monthAbbr = '', sortKey = 0;
 
-  // Pattern 1 — full month: "วันที่ 30 เมษายน 2569" OR "30 เมษายน 2569"
+  // Pattern 1 — full Thai month: "(วันที่ )DD FullMonth YYYY"
   const m1 = name.match(/(?:วันที่\s+)?(\d+)\s+([฀-๿]+)\s+(\d{4})/);
   if (m1) {
     day = m1[1];
@@ -60,13 +60,16 @@ function parseFilename(filename) {
     const mo = MONTH_NUM[monthAbbr] || 0;
     sortKey = yr * 10000 + mo * 100 + parseInt(day);
   } else {
-    // Pattern 2 — abbreviated: "วันที่ 4 พ.ค.69"
-    const m2 = name.match(/วันที่\s+(\d+)\s+([฀-๿]+\.[฀-๿]*\.?)(\d{2})/);
+    // Pattern 2 — abbreviated month: "(วันที่ )DD Abbr. (YY|YYYY)"
+    // handles: มี.ค.69  /  มี.ค. 69  /  มี.ค. 2569
+    const m2 = name.match(/(?:วันที่\s+)?(\d+)\s+([฀-๿]+\.[฀-๿]*\.?)\s*(\d{2,4})/);
     if (m2) {
       day = m2[1];
       monthAbbr = m2[2].endsWith('.') ? m2[2] : m2[2] + '.';
-      date = `${day} ${monthAbbr} 25${m2[3]}`;
-      const yr = 2500 + parseInt(m2[3]);
+      const yearRaw = m2[3];
+      const year = yearRaw.length <= 2 ? `25${yearRaw}` : yearRaw;
+      date = `${day} ${monthAbbr} ${year}`;
+      const yr = parseInt(year);
       const mo = MONTH_NUM[monthAbbr] || 0;
       sortKey = yr * 10000 + mo * 100 + parseInt(day);
     }
